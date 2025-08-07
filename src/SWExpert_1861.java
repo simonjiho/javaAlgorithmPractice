@@ -25,7 +25,6 @@ public class SWExpert_1861 {
 			N = Integer.parseInt(br.readLine());
 
 			int[][] arr = new int[N][N];
-			boolean[][] visited = new boolean[N][N];
 
 			for (int i = 0; i < N; i++) {
 				StringTokenizer st = new StringTokenizer(br.readLine());
