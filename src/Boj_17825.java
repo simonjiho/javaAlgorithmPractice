@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.StringTokenizer;
 
-// 14:20 시작
 
 public class Boj_17825 {
 
@@ -20,7 +19,7 @@ public class Boj_17825 {
 
 		Node curNode = startNode;
 
-		// 0 ~~ 40
+
 		ArrayList<Node> edgeNodes = new ArrayList<>();
 		for(int i = 0; i < 20; i++) {
 			Node node = new Node((i+1)*2);
@@ -101,6 +100,7 @@ public class Boj_17825 {
 	}
 
 	static void dfs(int cnt, int sum, Node[] nodes) {
+//		if (cnt == 10) {ans = Math.max(ans, sum); return;}
 		if (cnt == 10) {return;}
 
 //		System.out.println("dice thrown #"+(cnt+1));
@@ -109,7 +109,9 @@ public class Boj_17825 {
 			Node[] curNodes = nodes;
 			Node prevNode = curNodes[i], curNode = prevNode;
 			
+//			if(reachedEnd(prevNode)) System.out.println("piece " + i + " reached end");
 			if (reachedEnd(prevNode)) {ans = Math.max(ans, sum);continue;}
+//			if (reachedEnd(prevNode)) {continue;}
 			
 			int move = dice[cnt] + ((curNode.next_blue == null) ? 0 : -1);
 

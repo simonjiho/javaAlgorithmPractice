@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -9,18 +8,18 @@ import java.util.Collections;
 // 14:30~
 
 public class Boj_19236 {
-	
+
 	static Fish[][] map = new Fish[4][4];
-	static Fish shark;
+	static Shark shark;
 	static Fish[] fishes = new Fish[17];
 	static int[] dy = {999,-1,-1,0,1,1,1,0,-1};
 	static int[] dx = {999,0,-1,-1,-1,0,1,1,1};
 	static int maxScore = 0;
-	
-	
+
+
 	public static void main(String args[]) throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
+
 		for(int i = 0 ; i < 4; i++) {
 			String[] line = br.readLine().split(" ");
 			for (int j = 0; j < 4; j++) {
@@ -31,104 +30,91 @@ public class Boj_19236 {
 				fishes[score] = newFish;
 			}
 		}
-		shark = map[0][0];
+		
+		shark = new Shark(map[0][0].score, map[0][0].dir, 0, 0);
+		map[0][0] = shark;
 		fishes[shark.score] = null;
 
-		dfs(false);
-		
+		dfs();
+
 		System.out.println(maxScore);
 
 	}
 
 
-	private static boolean dfs(boolean resetOnLastTurn) {
+	private static void dfs() {
 		// 물고기 -> 상어
 		// 연속으로 두번 (0,0)에서 먹을 물고기 없으면 return
-		debugPrint();
-		debugPrint2();
+//		debugPrint();
+		
+//		debugPrint2();
 
+		boolean[] moved = new boolean[17];
+		int[] fishPrevDir = new int[17];
+		
 		for(int i = 1; i <= 16; i++) {
 			Fish fish = fishes[i];
 			if (fish == null) continue;
-			
-			fish.findValidDir();
-			int nextR = fish.nextR(), nextC = fish.nextC();
-			fish.swapFish(nextR, nextC);
+
+			fishPrevDir[i] = fish.dir;
+			moved[i] = fish.findValidDir();
+			fish.swapFish();
 		}
 		
-		debugPrint2();
+//		String moveS = "";
+//		for(int i = 1; i <= 16; i++) {
+//			moveS += moved[i] ? " o" : " x";
+//		}
+//		System.out.println(moveS);
+
+
+//		System.out.println("after fish moved");
+//		debugPrint2();
 
 		ArrayList<Fish> possibleFishes = shark.possibleFishes();
 		
-		if (possibleFishes.size() == 0 && resetOnLastTurn) {
+		if (possibleFishes.size() == 0) {
 			maxScore = Math.max(maxScore, shark.score);
-			return true;
+		}
+
+		int prevR = shark.r, prevC = shark.c, prevDir = shark.dir, prevScore = shark.score;
+		
+		for(Fish fish:possibleFishes) { // 실수2: 없으면 상어가 (0,0)으로 되돌아 가는 줄 알았다.
+
+			shark.eatFish(fish);
+
+			dfs();
+
+			// backTrack
+//			System.out.println("shark backTrack");
+//			System.out.println(prevScore);
+//			System.out.println(fish.r + " " + fish.c);
+			shark.backTrack(prevR, prevC, prevScore, prevDir);
+			fishes[fish.score] = fish;
+			map[fish.r][fish.c] = fish;
 		}
 		
-		boolean shouldReset = (possibleFishes.size() == 0) ;
-		int prevR = shark.r, prevC = shark.c, prevDir = shark.dir;
 
 		
-		if(shouldReset) {
-			if(map[0][0] == shark) return true;
-			
-			else if (map[0][0] == null) {
-				shark.changePos(0,0);
-				dfs(true);
-				// backTrack
-				shark.changePos(prevR, prevC);
-			} else {
-				Fish fish = map[0][0];
-				int score = fish.score; int dir = fish.dir;
-				int nextR = fish.r, nextC = fish.c;
-				
-				fishes[score] = null; // eatFish
-				map[nextR][nextC] = null; // eatFish
-				shark.swapFish(nextR, nextC);
-				shark.score += score;
-				shark.dir = dir;
-				
-				dfs(true);
-				
-				// backTrack
-				System.out.println("backTrack");
-				shark.backTrackValue(prevR, prevC, shark.score - score, prevDir);
-				fishes[score] = fish;
-				map[nextR][nextC] = fish;
-				map[prevR][prevC] = shark;			
-			}
-		} else {
-			for(Fish fish:possibleFishes) {
-				int score = fish.score; int dir = fish.dir;
-				int nextR = fish.r, nextC = fish.c;
-				
-				fishes[score] = null; // eatFish
-				map[nextR][nextC] = null; // eatFish
-				shark.swapFish(nextR, nextC);
-				shark.score += score;
-				shark.dir = dir;
-				
-				dfs(false);
-				
-				// backTrack
-				System.out.println("backTrack");
-				shark.backTrackValue(prevR, prevC, shark.score - score, prevDir);
-				fishes[score] = fish;
-				map[nextR][nextC] = fish;
-				map[prevR][prevC] = shark;		
-				
-			}
+		// backTrack 2
+		for(int i = 16; i >= 1; i--) {
+			Fish fish = fishes[i];
+			if (fish == null || !moved[i]) continue;
+//			System.out.println("backtracking fish " + i);
+			fish.backTrack(fishPrevDir[i]);
 		}
 		
-		
-		
-		return shouldReset;
+//		System.out.println("after fish backtrack");
+//		debugPrint2();
 
 		
+
+
+
 	}
-	
 
-	
+
+
 	private static void debugPrint() {
 		String s = "";
 		for(int i = 1; i <= 16; i++) {
@@ -137,7 +123,7 @@ public class Boj_19236 {
 		}
 		System.out.println(s);
 	}
-	
+
 	private static void debugPrint2() {
 		for(int i = 0; i < 4; i++) {
 			String s = "";
@@ -149,36 +135,40 @@ public class Boj_19236 {
 
 		}
 	}
-	
+
 	private static boolean isValid(int r, int c) {
 		return r >= 0 && r < 4 && c >= 0 && c < 4;
 	}
 
-	
+
 	private static class Fish {
 		int score;
 		int dir;
 		int r;
 		int c;
-		
+
 		Fish(int score, int dir, int r, int c) {
 			this.score = score; this.dir = dir; this.r = r; this.c = c;
 		}
-		
-		void findValidDir() {
+
+		boolean findValidDir() {
 			int nextR = nextR();
 			int nextC = nextC();
-			
+
 			int cnt = 0;
-			while(!isValid(nextR, nextC) || map[nextR][nextC] == shark || cnt >= 8) {
+			while(!isValid(nextR, nextC) || map[nextR][nextC] == shark) { // 실수1:cnt를 조건에 넣었다 
 				dir++;
 				if (dir == 9) dir = 1;
 				nextR = nextR();
 				nextC = nextC();
 				cnt++;
+				if (cnt == 8) break;
 			}
+			
+			return cnt < 8;
+			
 		}
-		
+
 		int nextR() {
 			return this.r + dy[dir];
 		}
@@ -186,42 +176,74 @@ public class Boj_19236 {
 			return this.c + dx[dir];
 		}
 		
-		void changePos(int r, int c) {
-			this.r = r; this.c = c;
-			map[r][c] = this;
+		int prevR() {
+			return this.r - dy[dir];
 		}
-		
-		void swapFish(int nextR, int nextC) {
-			int prevR = r, prevC = c;
-			Fish targetFish = map[nextR][nextC];
-			if (targetFish != null) {targetFish.changePos(prevR, prevC);}
-			else { map[prevR][prevC] = null; }
-			changePos(nextR, nextC);
+		int prevC() {
+			return this.c - dx[dir];
+		}
 
+		void changePos(int nextR, int nextC) {
+			this.r = nextR; this.c = nextC;
+			map[nextR][nextC] = this;
+		}
+
+		void swapFish() {
+			int nextR = nextR(), nextC = nextC();
+			Fish targetFish = map[nextR][nextC];
+			if (targetFish != null) {targetFish.changePos(r, c);}
+			else { map[r][c] = null; }
+			changePos(nextR, nextC);
 		}
 		
-		void backTrackValue(int prevR, int prevC, int prevScore, int prevDir) {
-			this.r = prevR; this.c = prevC; this.score = prevScore; this.dir = prevDir;
+		void backTrack(int prevDir) {
+			int prevR = prevR(), prevC = prevC();
+			Fish targetFish = map[prevR][prevC];
+			if (targetFish != null) {targetFish.changePos(r, c);}
+			else { map[r][c] = null; }
+			changePos(prevR, prevC);
+			this.dir = prevDir;
 		}
 		
-		ArrayList<Fish> possibleFishes() { // only shark use this method
-			System.out.println(this == shark);
-			System.out.println(this.r + " " + this.c);
+
+	}
+	
+	static class Shark extends Fish {
+
+		
+		Shark(int score, int dir, int r, int c) {
+			super(score, dir, r, c);
+		}
+		
+		void eatFish(Fish fish) {
+			fishes[fish.score] = null; // eatFish
+			map[this.r][this.c] = null; // eathFish
+			changePos(fish.r, fish.c);
+			shark.score += fish.score;
+			shark.dir = fish.dir;
+		}
+		
+		
+		ArrayList<Fish> possibleFishes() {
 			ArrayList<Fish> result = new ArrayList<>();
 			int fishR = nextR(); int fishC = nextC();
-			System.out.println(fishR + " " + fishC);
 			int dR = dy[dir]; int dC = dx[dir];
 			while(isValid(fishR,fishC)) {
-				System.out.println(fishR + " " + fishC);
+//				System.out.println(fishR + " " + fishC);
 				if(map[fishR][fishC] != null) result.add(map[fishR][fishC]);
 				fishR += dR ;
 				fishC += dC;
 			}
-			System.out.println(result.size());
+//			System.out.println(result.size());
 			return result;
 		}
 		
-
+		
+		void backTrack(int prevR, int prevC, int prevScore, int prevDir) {
+			changePos(prevR,prevC);
+			this.score = prevScore; this.dir = prevDir;
+		}
+		
 	}
 
 }

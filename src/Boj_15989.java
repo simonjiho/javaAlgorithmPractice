@@ -1,13 +1,12 @@
-//
+////
 //import java.io.BufferedReader;
 //import java.io.InputStreamReader;
 //import java.util.Arrays;
 //import java.util.Collections;
-//
-//// 15:10 시작
-//
+////
+////// 15:10 시작
+////
 //public class Boj_15989 {
-//	
 //	
 //
 //	
