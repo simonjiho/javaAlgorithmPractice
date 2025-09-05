@@ -4,11 +4,11 @@ import java.util.Scanner;
 
 public class SWExpert_25111 {
 	
+
     static final long MOD = 1000000009L;
 
 	public static void main(String args[]) throws Exception {
 		Scanner sc = new Scanner(System.in);
-
 		
 
 		int T = sc.nextInt();
@@ -20,6 +20,7 @@ public class SWExpert_25111 {
 			
 			long ans;
 			
+
 			int N = sc.nextInt();
 			int M = sc.nextInt();
 			int K = sc.nextInt();
@@ -42,6 +43,7 @@ public class SWExpert_25111 {
 				int q = z/K;
 				int r = z%K;
 				
+
                 if (q > 40) {
                     long num = 1L;
                     int rem = q;
@@ -65,9 +67,6 @@ public class SWExpert_25111 {
 
 
 			}
-
-
-	
 
 			System.out.println(ans % MOD);
 			
