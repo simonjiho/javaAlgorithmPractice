@@ -1,8 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.PriorityQueue;
-import java.util.StringTokenizer;
+
 
 
 
@@ -92,7 +90,13 @@ public class SWExpert_1257 {
 		
 		
 		String find(int n) {
-			if (root.cnt < n) return "none";
+			
+			int totalCnt = 0;
+			for(int i = 0; i < 26; i++) {
+				if(root.child[i] == null) continue;
+				totalCnt += root.child[i].cnt;
+			}
+			if(totalCnt < n) return "none";
 			
 			
 			TrieNode node = root;
@@ -114,7 +118,8 @@ public class SWExpert_1257 {
 
 			}
 			
-			System.out.println(cnt == n);
+			
+//			System.out.println(cnt == n);
 			
 			String result = sb.toString();
 			sb = new StringBuilder();
